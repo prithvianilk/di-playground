@@ -1,23 +1,25 @@
-package com.prithvianilk.guice;
+package com.prithvianilk.dagger;
 
-import com.google.inject.AbstractModule;
 import com.prithvianilk.logger.Logger;
 import com.prithvianilk.logger.NoOpLogger;
 import com.prithvianilk.logger.StdoutLogger;
+import dagger.Module;
+import dagger.Provides;
 
-public class LoggerModule extends AbstractModule {
+@Module
+public class LoggerModule {
     private final boolean doNothing;
 
     public LoggerModule(boolean doNothing) {
         this.doNothing = doNothing;
     }
 
-    @Override
-    protected void configure() {
+    @Provides
+    public Logger provideLogger() {
         if (doNothing) {
-            bind(Logger.class).to(NoOpLogger.class);
+            return new NoOpLogger();
         } else {
-            bind(Logger.class).to(StdoutLogger.class);
+            return new StdoutLogger();
         }
     }
 }

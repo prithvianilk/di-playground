@@ -1,25 +1,44 @@
 package com.prithvianilk;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.prithvianilk.guice.ExclaimerModule;
-import com.prithvianilk.guice.LoggerModule;
+import com.prithvianilk.dagger.DaggerExclaimerGetter;
+import com.prithvianilk.guice.GuiceInstanceGetter;
 
-import java.util.Objects;
+import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) {
-        boolean doNothing = parseArgs(args);
-        LoggingExclaimer exclaimer = getExclaimer(doNothing);
-        exclaimer.exclaim("Hello", "World");
+        try {
+            Config config = parseArgs(args);
+            Exclaimer exclaimer = getExclaimer(config);
+            exclaimer.exclaim("Hello", "World");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private static boolean parseArgs(String[] args) {
-        return args.length > 0 && Objects.equals(args[0], "doNothing");
+    private static Config parseArgs(String[] args) {
+        boolean doNothing = Arrays.asList(args).contains("doNothing");
+
+        DiType diType = Arrays.stream(args)
+                .map(Main::toDiType)
+                .findFirst()
+                .orElseThrow();
+
+        return new Config(doNothing, diType);
     }
 
-    private static LoggingExclaimer getExclaimer(boolean doNothing) {
-        Injector injector = Guice.createInjector(new LoggerModule(doNothing), new ExclaimerModule());
-        return injector.getInstance(LoggingExclaimer.class);
+    private static DiType toDiType(String argumentValue) {
+        try {
+            return DiType.valueOf(argumentValue);
+        } catch (Exception e) {
+            throw new RuntimeException("No valid DiType: " + argumentValue);
+        }
+    }
+
+    private static Exclaimer getExclaimer(Config config) {
+        return switch (config.diType()) {
+            case GUICE -> new GuiceInstanceGetter(config.doNothing()).getInjector().getInstance(Exclaimer.class);
+            case DAGGER_2 -> new DaggerExclaimerGetter(config.doNothing()).getExclaimer();
+        };
     }
 }
