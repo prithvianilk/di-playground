@@ -3,7 +3,9 @@ package com.prithvianilk;
 import com.prithvianilk.logger.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class LoggingExclaimer implements Exclaimer {
     Logger logger;
 

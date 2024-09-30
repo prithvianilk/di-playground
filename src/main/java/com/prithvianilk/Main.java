@@ -1,5 +1,6 @@
 package com.prithvianilk;
 
+import com.prithvianilk.avaje.AvajeExclaimerGetter;
 import com.prithvianilk.dagger.DaggerExclaimerGetter;
 import com.prithvianilk.guice.GuiceInstanceGetter;
 
@@ -39,6 +40,7 @@ public class Main {
         return switch (config.diType()) {
             case GUICE -> new GuiceInstanceGetter(config.doNothing()).getInjector().getInstance(Exclaimer.class);
             case DAGGER_2 -> new DaggerExclaimerGetter(config.doNothing()).getExclaimer();
+            case AVAJE -> new AvajeExclaimerGetter(config.doNothing()).getBeanScope().get(Exclaimer.class);
         };
     }
 }
